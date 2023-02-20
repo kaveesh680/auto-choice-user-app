@@ -1,27 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { Heading, Flex, IconButton, Icon, Button, FormControl, ScrollView, Input, WarningOutlineIcon, Checkbox, Box, TextArea } from "native-base";
 import { Entypo } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
-
+import * as Location from 'expo-location';
 import  CustomButton  from '../components/CustomButton'
-
-
+import RNDateTimePicker from '@react-native-community/datetimepicker';
 
 export default function NewClaimScreen({navigation}) {
 
-    const [location, setLocation] = useState('Fetched Location');
-    const [dateTime, setDateTime] = useState('Fetched Date Time');
-   
-    //validation
-    const [invalidLocation, setInvalidLocation] = useState(false);
-    const [invalidDateTime, setInvalidDateTime] = useState(false);
+    const [location, setLocation] = useState();
+    const [dateTime, setDateTime] = useState(new Date());
+    const [numberPlateImage, setNumberPlateImage] = useState('');
+    const [damageImages, setDamageImages] = useState([]);
+    const [description, setDescription] = useState();
    
     const uploadImage =  require('../assets/upload.png');
 
-    const buttonPress = (nav) => navigation.navigate(nav);
-
     const onSubmit = () =>{
+  
         // console.log('Fuck')
         // console.log(firstName)
         // if (firstName == ''){
@@ -50,20 +47,45 @@ export default function NewClaimScreen({navigation}) {
         // }   
     }
 
-    const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
+
+    // image picker
+    const pickImage = async (type,context) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
+            allowsMultipleSelection:type,
             aspect: [4, 3],
             quality: 1,
+            base64: true,
         });
-
+       
         if (!result.canceled) {
-            setCustomerImg(result.assets[0]);
-            console.log(result.assets[0]);
+          if(context =='nb_plate'){
+            setNumberPlateImage(result.assets[0])
+          } else if (context =='damage'){
+            setDamageImages(result.assets)
+          }
         }
     };
+
+    //pick date time
+    const setDate = (event, selectedDate) => {
+      const currentDate = selectedDate || dateTime;
+      const localDate = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000));
+      setDateTime(localDate);
+    };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      let address = await Location.reverseGeocodeAsync(location.coords)
+      setLocation(address[0].street+", "+address[0].city);
+    })();
+  }, []);
 
 
   return (
@@ -100,7 +122,7 @@ export default function NewClaimScreen({navigation}) {
                         onChangeText={null}
                         borderColor={'#3774CE'}
                         size={'xl'}
-                        defaultValue={location}
+                        value={location}
                         isDisabled={true}
                     />
                     <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
@@ -108,48 +130,29 @@ export default function NewClaimScreen({navigation}) {
                     </FormControl.ErrorMessage>
                 </FormControl>
 
-                <Checkbox value={true} accessibilityLabel="Select Different Location" >
+                {/* <Checkbox value={true} accessibilityLabel="Select Different Location" >
                   Select Different Location
-                </Checkbox>
+                </Checkbox> */}
 
               </View>
 
-            {/* Date time */}
-              <View>
-                <FormControl isInvalid={false} marginBottom='1'>
-                      <Input
-                          placeholder={'Date Time'}
-                          onChangeText={null}
-                          borderColor={'#3774CE'}
-                          size={'xl'}
-                          defaultValue={dateTime}
-                          isDisabled={true}
-                      />
-                      <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                        {'Invalid Date Time'}
-                      </FormControl.ErrorMessage>
-                  </FormControl>
-
-
-                  <Checkbox value={true} accessibilityLabel="Select Different Location" >
-                    Select Different Date|Time
-                  </Checkbox>
-              </View>
+          
+          <Text> <RNDateTimePicker mode='datetime' value={dateTime}  onChange={setDate}/> </Text>
 
           </View>
           
           <Box p="1" bg="#154897"></Box>
 
           <View style={{padding:30}}>
-            <CustomButton text='Upload Images of Vehicle Number Plate' image={uploadImage}  buttonPress={()=>buttonPress('New_Claim')}/>
+            <CustomButton text='Upload Images of Vehicle Number Plate' image={uploadImage}  buttonPress={()=>pickImage(false, 'nb_plate')}/>
             <Box marginBottom={5} />
-            <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>buttonPress('New_Claim')}/>
+            <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>pickImage(true,'damage')}/>
           </View>
               
           <Box p="1" bg="#154897"></Box>
 
           <View style={{padding:30}}>
-             <TextArea h={20} placeholder="Description"  bgColor={'white'} borderColor={'#154897'} fontSize={20} />
+             <TextArea h={20} placeholder="Description" onChangeText={setDescription} value={description}  bgColor={'white'} borderColor={'#154897'} fontSize={20} />
           </View>
 
          <View style={{paddingHorizontal:30}}>
