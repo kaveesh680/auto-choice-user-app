@@ -14,7 +14,7 @@ export default function NewClaimScreen({navigation}) {
     const [location, setLocation] = useState();
     const [dateTime, setDateTime] = useState(new Date());
     const [numberPlateImage, setNumberPlateImage] = useState('');
-    const [damageImages, setDamageImages] = useState([]);
+    const [damageImages, setDamageImages] = useState('');
     const [description, setDescription] = useState();
     const [vehicles,setVehicles] = useState();
     const [selectedVehicle, setSelectedVehicle] = useState();
@@ -40,10 +40,10 @@ export default function NewClaimScreen({navigation}) {
         "description":description,
         "vehicleId":selectedVehicle,
         "currentStatus":'pending',
-        // "numberPlateImage":numberPlateImage.base64,
-        // "images":damageImages[0]
-        "numberPlateImage":null,
+        "numberPlateImage":numberPlateImage.base64,
+        // "images":damageImages.base64
         "images":null
+
        }
 
        addClaim(data);
@@ -69,12 +69,7 @@ export default function NewClaimScreen({navigation}) {
           if(context =='nb_plate'){
             setNumberPlateImage(result.assets[0])
           } else if (context =='damage'){
-            
-            //convert all images to base64
-            let imagesList = result.assets?.map((image)=>(image = image.base64))
-
-            setDamageImages(imagesList)
-
+            setDamageImages(result.assets[0])
           }
         }
     };
@@ -183,7 +178,7 @@ export default function NewClaimScreen({navigation}) {
           <View style={{padding:30}}>
             <CustomButton text='Upload Images of Vehicle Number Plate' image={uploadImage}  buttonPress={()=>pickImage(false, 'nb_plate')}/>
             <Box marginBottom={5} />
-            <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>pickImage(true,'damage')}/>
+            <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>pickImage(false,'damage')}/>
           </View>
               
           <Box p="1" bg="#154897"></Box>
