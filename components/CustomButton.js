@@ -6,7 +6,7 @@ const CustomButton = (props) =>{
     return (
         <View>
         <TouchableOpacity onPress={props.buttonPress}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth:1, backgroundColor:'white', borderColor:'white', borderRadius:10, paddingHorizontal:40}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth:1, backgroundColor:'white', borderColor:'#154897', borderRadius:10, paddingHorizontal:40}}>
                    <Image 
                     source={props.image}
                     style={{ width: 35, height: 35, margin:10 }}
