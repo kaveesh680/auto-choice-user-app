@@ -1,4 +1,4 @@
-import React,{ useState, useEffect } from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import { StyleSheet, Image, View} from 'react-native';
 import { Flex, Spacer, Heading, ScrollView } from "native-base";
 
@@ -7,18 +7,23 @@ import ClaimTile from "../components/ClaimTile";
 
 import {getAllClaims} from "../services/service";
 import {useIsFocused} from "@react-navigation/native";
+import {AuthContext} from "../context/AuthContext";
 
 export default function HomeScreen({navigation}) {
 
-    const [username, setUserName] = useState('Kaveesh'); 
     const [claims, setClaims]  = useState(null);
     const isFocused = useIsFocused();
+    const { userDetails } = useContext(AuthContext);
 
     const imageClaim =  require('../assets/claim-blue.png');
 
     const buttonPress = (nav) => navigation.navigate(nav);
 
     const viewClaim =(claim_id)=>{navigation.navigate('View_Claim',{claim_id})}
+
+    // getAllClaims('active').then((response)=>{
+    //     setClaims(response?.data?.data)
+    // });
 
     useEffect(() => {
         getAllClaims('active').then((response)=>{
@@ -30,7 +35,7 @@ export default function HomeScreen({navigation}) {
         <View style={styles.mainContainer}>
             <View style={styles.topContainer}>
                 <Flex direction="row" mb="10" mt="12">
-                    <Heading color="white" fontSize="35"> Hi {username} !</Heading>
+                    <Heading color="white" fontSize="35"> Hi {userDetails?.first_name} !</Heading>
                     <Spacer />
                     <Image source={require('../assets/LOGO-WHITE-CROPPED.png')} style={styles.topImage} />
                 </Flex>
