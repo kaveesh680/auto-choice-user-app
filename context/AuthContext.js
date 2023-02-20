@@ -1,24 +1,31 @@
 import React, {createContext, useEffect, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Axios from 'axios';
+import {useToast} from "native-base";
 
 export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
     const [isLoading, setIsLoading] = useState(true);
     const [userToken, setUserToken] = useState('');
+    // const [successMessage, setSuccessMessage] = useState('');
+
+    const toast = useToast();
 
     // pasan -  172.20.10.2
     // kaveesh - 10.10.6.199
 
     const login = async (username, password) => {
         setIsLoading(true);
-        Axios.post('http://172.20.10.2:3000/api/auth/login',
+        Axios.post('http://10.10.6.199:3000/api/auth/login',
             { userName:username, password:password }).
         then(async(response) => {
             if (response.data.data){
                 setUserToken(response.data.data.jwt);
                 await AsyncStorage.setItem('userToken', response.data.data.jwt);
-            }     
+            }
+            toast.show({
+                description: `${response.data?.message}`
+            });
         }).catch((err) => {
             console.log(err);
         })
@@ -29,6 +36,9 @@ export const AuthProvider = ({children}) => {
     const logout = async() => {
         setIsLoading(true);
         await AsyncStorage.removeItem('userToken');
+        toast.show({
+            description: 'Successfully Logged out!'
+        })
         setUserToken(null);
         setIsLoading(false);
     }
@@ -46,9 +56,6 @@ export const AuthProvider = ({children}) => {
 
     useEffect(() => {
         isLoggedIn();
-        // logout();
-        // let userToken = AsyncStorage.getItem('userToken');
-        // console.log(userToken);
     }, []);
 
     return (
