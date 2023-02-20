@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { Heading, Flex, IconButton, Icon, Button, FormControl, ScrollView, Input, WarningOutlineIcon, Checkbox, Box, TextArea } from "native-base";
+import { Heading, Flex, IconButton, Icon, Button, FormControl, ScrollView, Input, WarningOutlineIcon, useToast, Box, TextArea, Select, CheckIcon } from "native-base";
 import { Entypo } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import  CustomButton  from '../components/CustomButton'
 import RNDateTimePicker from '@react-native-community/datetimepicker';
+
+import {addClaim, getAllVehicles} from "../services/service";
 
 export default function NewClaimScreen({navigation}) {
 
@@ -14,37 +16,42 @@ export default function NewClaimScreen({navigation}) {
     const [numberPlateImage, setNumberPlateImage] = useState('');
     const [damageImages, setDamageImages] = useState([]);
     const [description, setDescription] = useState();
+    const [vehicles,setVehicles] = useState();
+    const [selectedVehicle, setSelectedVehicle] = useState();
+
+    const [invalidVehicle, setInvlaidVehicle] = useState(false);
+
+    const toast = useToast();
    
     const uploadImage =  require('../assets/upload.png');
 
     const onSubmit = () =>{
-  
-        // console.log('Fuck')
-        // console.log(firstName)
-        // if (firstName == ''){
-        //     setInvalidFirstName(true)
-        // }
-        // if (lastName == ''){
-        //     setInvalidLastName(true)
-        // }
-        // if (nic == ''){
-        //     setInvalidNic(true)
-        // } 
-        // if (license == ''){
-        //     setInvalidLicense(true)
-        // } 
-        // if (address == ''){
-        //     setInvalidLicense(true)
-        // } 
-        // if (mobile == ''){
-        //     setInvalidMobile(true)
-        // }
-        // if (residence == ''){
-        //     setInvalidResidence(true)
-        // }
-        // else{
-        //     console.log('write the service function yo')
-        // }   
+    
+       if(damageImages==[] || numberPlateImage=='' || description==''){
+        console.log('Fuck')
+        toast.show({
+                description: `Missing Fields`
+            });
+       }
+
+       const data = {
+        "location":location,
+        "dateTime":dateTime,
+        "description":description,
+        "vehicleId":selectedVehicle,
+        "currentStatus":'pending',
+        // "numberPlateImage":numberPlateImage.base64,
+        // "images":damageImages[0]
+        "numberPlateImage":null,
+        "images":null
+       }
+
+       addClaim(data);
+       navigation.navigate('Home')
+          toast.show({
+              description: 'Successfully Reported the claim!'
+          })
+       
     }
 
 
@@ -62,7 +69,12 @@ export default function NewClaimScreen({navigation}) {
           if(context =='nb_plate'){
             setNumberPlateImage(result.assets[0])
           } else if (context =='damage'){
-            setDamageImages(result.assets)
+            
+            //convert all images to base64
+            let imagesList = result.assets?.map((image)=>(image = image.base64))
+
+            setDamageImages(imagesList)
+
           }
         }
     };
@@ -76,6 +88,11 @@ export default function NewClaimScreen({navigation}) {
 
   useEffect(() => {
     (async () => {
+
+      getAllVehicles().then((response)=>{
+            setVehicles(response?.data?.data)
+      })
+
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         setErrorMsg('Permission to access location was denied');
@@ -110,13 +127,37 @@ export default function NewClaimScreen({navigation}) {
 
         <ScrollView>
 
+          <View style={{padding:30}}>
+
+                <FormControl  isInvalid={invalidVehicle} paddingBottom={5}>
+                    <Select accessibilityLabel="Select Vehicle" fontSize={18} placeholder="Select Vehicle" value={selectedVehicle} _selectedItem={{
+                        bg: "#154897",
+                        endIcon: <CheckIcon size={5} />
+                    }} mt="1" onValueChange={itemValue => setSelectedVehicle(itemValue)}>
+                        {
+                            vehicles?.map((vehicle)=>(
+                                <Select.Item key={vehicle.id} label={vehicle.model + ' '+ vehicle.number} value={vehicle.id} />
+                            ))
+                        }
+                    </Select>
+                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                        Select a vehicle
+                    </FormControl.ErrorMessage>
+                </FormControl>
+            
+          </View>
+          
+          <Box p="1" bg="#154897"></Box>
+
         
           <View style={{padding:30}}>
+
+            
 
             <View style={{marginBottom:20}}>
           
               {/* Location */}
-              <FormControl isInvalid={false} marginBottom='1'>
+    
                     <Input
                         placeholder={'Location'}
                         onChangeText={null}
@@ -125,11 +166,7 @@ export default function NewClaimScreen({navigation}) {
                         value={location}
                         isDisabled={true}
                     />
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      {'Invalid Location'}
-                    </FormControl.ErrorMessage>
-                </FormControl>
-
+                   
                 {/* <Checkbox value={true} accessibilityLabel="Select Different Location" >
                   Select Different Location
                 </Checkbox> */}
