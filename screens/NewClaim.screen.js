@@ -8,6 +8,8 @@ import  CustomButton  from '../components/CustomButton'
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 
 import {addClaim, getAllVehicles} from "../services/service";
+import NetInfo from "@react-native-community/netinfo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function NewClaimScreen({navigation}) {
 
@@ -27,30 +29,42 @@ export default function NewClaimScreen({navigation}) {
 
     const onSubmit = () =>{
 
-       if(damageImages==[] || numberPlateImage=='' || description==''){
-        console.log('Fuck')
-        toast.show({
+        if(damageImages==[] || numberPlateImage=='' || description==''){
+            toast.show({
                 description: `Missing Fields`
             });
-       }
-        console.log(damageImages[0]);
-       const data = {
-        "location":location,
-        "dateTime":dateTime,
-        "description":description,
-        "vehicleId":selectedVehicle,
-        "currentStatus":'pending',
-        "numberPlateImage":numberPlateImage.base64,
-        // "images":damageImages.base64
-        "images":null
+        }
 
-       }
+        const data = {
+            "location":location,
+            "dateTime":dateTime,
+            "description":description,
+            "vehicleId":selectedVehicle,
+            "currentStatus":'pending',
+            "numberPlateImage":numberPlateImage.base64,
+            // "numberPlateImage":null,
+            "images":damageImages.base64
+            // "images":null
 
-       addClaim(data);
-       navigation.navigate('Home')
-          toast.show({
-              description: 'Successfully Reported the claim!'
-          })
+        }
+
+        NetInfo.addEventListener(state => {
+            // setIsConnected(state.isConnected);
+            console.log('checkingggggggg');
+            if (state.isConnected) {
+                addClaim(data);
+            } else {
+                (async () => {
+                    await AsyncStorage.setItem('claimData', JSON.stringify(data));
+                })();
+            }
+        });
+
+
+        navigation.navigate('Home')
+        toast.show({
+            description: 'Successfully Reported the claim!'
+        })
 
     }
 
@@ -66,11 +80,11 @@ export default function NewClaimScreen({navigation}) {
         });
        
         if (!result.canceled) {
-          if(context =='nb_plate'){
-            setNumberPlateImage(result.assets[0])
-          } else if (context =='damage'){
-            setDamageImages(result.assets[0])
-          }
+            if(context =='nb_plate'){
+                setNumberPlateImage(result.assets[0])
+            } else if (context =='damage'){
+                setDamageImages(result.assets[0])
+            }
         }
     };
 
@@ -81,23 +95,23 @@ export default function NewClaimScreen({navigation}) {
         setDateTime(localDate);
     };
 
-  useEffect(() => {
-    (async () => {
+    useEffect(() => {
+        (async () => {
 
-      getAllVehicles().then((response)=>{
-            setVehicles(response?.data?.data)
-      })
+            getAllVehicles().then((response)=>{
+                setVehicles(response?.data?.data)
+            })
 
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-      let location = await Location.getCurrentPositionAsync({});
-      let address = await Location.reverseGeocodeAsync(location.coords)
-      setLocation(address[0].street+", "+address[0].city);
-    })();
-  }, []);
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setErrorMsg('Permission to access location was denied');
+                return;
+            }
+            let location = await Location.getCurrentPositionAsync({});
+            let address = await Location.reverseGeocodeAsync(location.coords)
+            setLocation(address[0].street+", "+address[0].city);
+        })();
+    }, []);
 
 
     return (
@@ -122,47 +136,47 @@ export default function NewClaimScreen({navigation}) {
 
                 <ScrollView>
 
-          <View style={{padding:30}}>
+                    <View style={{padding:30}}>
 
-                <FormControl  isInvalid={invalidVehicle} paddingBottom={5}>
-                    <Select accessibilityLabel="Select Vehicle" fontSize={18} placeholder="Select Vehicle" value={selectedVehicle} _selectedItem={{
-                        bg: "#154897",
-                        endIcon: <CheckIcon size={5} />
-                    }} mt="1" onValueChange={itemValue => setSelectedVehicle(itemValue)}>
-                        {
-                            vehicles?.map((vehicle)=>(
-                                <Select.Item key={vehicle.id} label={vehicle.model + ' '+ vehicle.number} value={vehicle.id} />
-                            ))
-                        }
-                    </Select>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                        Select a vehicle
-                    </FormControl.ErrorMessage>
-                </FormControl>
+                        <FormControl  isInvalid={invalidVehicle} paddingBottom={5}>
+                            <Select accessibilityLabel="Select Vehicle" fontSize={18} placeholder="Select Vehicle" value={selectedVehicle} _selectedItem={{
+                                bg: "#154897",
+                                endIcon: <CheckIcon size={5} />
+                            }} mt="1" onValueChange={itemValue => setSelectedVehicle(itemValue)}>
+                                {
+                                    vehicles?.map((vehicle)=>(
+                                        <Select.Item key={vehicle.id} label={vehicle.model + ' '+ vehicle.number} value={vehicle.id} />
+                                    ))
+                                }
+                            </Select>
+                            <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                                Select a vehicle
+                            </FormControl.ErrorMessage>
+                        </FormControl>
 
-          </View>
+                    </View>
 
-          <Box p="1" bg="#154897"></Box>
+                    <Box p="1" bg="#154897"></Box>
 
 
                     <View style={{padding:30}}>
 
 
 
-            <View style={{marginBottom:20}}>
+                        <View style={{marginBottom:20}}>
           
-              {/* Location */}
+                            {/* Location */}
 
-                    <Input
-                        placeholder={'Location'}
-                        onChangeText={null}
-                        borderColor={'#3774CE'}
-                        size={'xl'}
-                        value={location}
-                        isDisabled={true}
-                    />
+                            <Input
+                                placeholder={'Location'}
+                                onChangeText={null}
+                                borderColor={'#3774CE'}
+                                size={'xl'}
+                                value={location}
+                                isDisabled={true}
+                            />
 
-                {/* <Checkbox value={true} accessibilityLabel="Select Different Location" >
+                            {/* <Checkbox value={true} accessibilityLabel="Select Different Location" >
                   Select Different Location
                 </Checkbox> */}
 
@@ -175,11 +189,11 @@ export default function NewClaimScreen({navigation}) {
           
                     <Box p="1" bg="#154897"></Box>
 
-          <View style={{padding:30}}>
-            <CustomButton text='Upload Images of Vehicle Number Plate' image={uploadImage}  buttonPress={()=>pickImage(false, 'nb_plate')}/>
-            <Box marginBottom={5} />
-            <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>pickImage(false,'damage')}/>
-          </View>
+                    <View style={{padding:30}}>
+                        <CustomButton text='Upload Images of Vehicle Number Plate' image={uploadImage}  buttonPress={()=>pickImage(false, 'nb_plate')}/>
+                        <Box marginBottom={5} />
+                        <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>pickImage(false,'damage')}/>
+                    </View>
               
                     <Box p="1" bg="#154897"></Box>
 
