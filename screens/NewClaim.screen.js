@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { Heading, Flex, IconButton, Icon, Button, FormControl, ScrollView, Input, WarningOutlineIcon, useToast, Box, TextArea, Select, CheckIcon } from "native-base";
+import { Heading, Flex, IconButton, Icon, Button, FormControl, ScrollView, Input, WarningOutlineIcon, useToast, Box, TextArea, Select, CheckIcon, Image } from "native-base";
 import { Entypo } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -33,9 +33,8 @@ export default function NewClaimScreen({navigation}) {
             toast.show({
                 description: `Missing Fields`
             });
-        }
-
-        const data = {
+        } else{
+          const data = {
             "location":location,
             "dateTime":dateTime,
             "description":description,
@@ -45,27 +44,25 @@ export default function NewClaimScreen({navigation}) {
             // "numberPlateImage":null,
             "images":damageImages.base64
             // "images":null
+          }
 
+          NetInfo.addEventListener(state => {
+              // setIsConnected(state.isConnected);
+              console.log('checkingggggggg');
+              if (state.isConnected) {
+                  addClaim(data);
+              } else {
+                  (async () => {
+                      await AsyncStorage.setItem('claimData', JSON.stringify(data));
+                  })();
+              }
+          });
+
+          navigation.navigate('Home')
+          toast.show({
+              description: 'Successfully Reported the claim!'
+          })
         }
-
-        NetInfo.addEventListener(state => {
-            // setIsConnected(state.isConnected);
-            console.log('checkingggggggg');
-            if (state.isConnected) {
-                addClaim(data);
-            } else {
-                (async () => {
-                    await AsyncStorage.setItem('claimData', JSON.stringify(data));
-                })();
-            }
-        });
-
-
-        navigation.navigate('Home')
-        toast.show({
-            description: 'Successfully Reported the claim!'
-        })
-
     }
 
 
@@ -191,8 +188,26 @@ export default function NewClaimScreen({navigation}) {
 
                     <View style={{padding:30}}>
                         <CustomButton text='Upload Images of Vehicle Number Plate' image={uploadImage}  buttonPress={()=>pickImage(false, 'nb_plate')}/>
+                         {numberPlateImage && (
+                              <View style={{marginTop: 10, display: 'flex', alignSelf: 'center'}}>
+                                  <Image source={{
+                                      uri: `${numberPlateImage?.uri}`
+                                  }} alt="number-image" size="xl"  style={{marginTop: 15}} />
+                              </View>
+                          )}
+
                         <Box marginBottom={5} />
                         <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>pickImage(false,'damage')}/>
+                                    
+                         {damageImages && (
+                              <View style={{marginTop: 10, display: 'flex', alignSelf: 'center'}}>
+                                  <Image source={{
+                                      uri: `${damageImages?.uri}`
+                                  }} alt="number-image" size="xl"  style={{marginTop: 15}} />
+                              </View>
+                          )}
+
+
                     </View>
               
                     <Box p="1" bg="#154897"></Box>
