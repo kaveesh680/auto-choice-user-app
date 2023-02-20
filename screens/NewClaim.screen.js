@@ -22,18 +22,18 @@ export default function NewClaimScreen({navigation}) {
     const [invalidVehicle, setInvlaidVehicle] = useState(false);
 
     const toast = useToast();
-   
+
     const uploadImage =  require('../assets/upload.png');
 
     const onSubmit = () =>{
-    
+
        if(damageImages==[] || numberPlateImage=='' || description==''){
         console.log('Fuck')
         toast.show({
                 description: `Missing Fields`
             });
        }
-
+        console.log(damageImages[0]);
        const data = {
         "location":location,
         "dateTime":dateTime,
@@ -51,7 +51,7 @@ export default function NewClaimScreen({navigation}) {
           toast.show({
               description: 'Successfully Reported the claim!'
           })
-       
+
     }
 
 
@@ -76,9 +76,9 @@ export default function NewClaimScreen({navigation}) {
 
     //pick date time
     const setDate = (event, selectedDate) => {
-      const currentDate = selectedDate || dateTime;
-      const localDate = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000));
-      setDateTime(localDate);
+        const currentDate = selectedDate || dateTime;
+        const localDate = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000));
+        setDateTime(localDate);
     };
 
   useEffect(() => {
@@ -100,27 +100,27 @@ export default function NewClaimScreen({navigation}) {
   }, []);
 
 
-  return (
-    <View style={styles.mainContainer}>
-      <View style={styles.topContainer}>
-        <Flex direction="row" > 
-        <IconButton
-            icon={
-                <Icon as={Entypo} name="back" color={'white'}/>
-            }
-            borderRadius="full"
-            onPress={()=>navigation.navigate('Home')}
-        />
+    return (
+        <View style={styles.mainContainer}>
+            <View style={styles.topContainer}>
+                <Flex direction="row" >
+                    <IconButton
+                        icon={
+                            <Icon as={Entypo} name="back" color={'white'}/>
+                        }
+                        borderRadius="full"
+                        onPress={()=>navigation.navigate('Home')}
+                    />
       
-        <View style={{ width:'80%' }}>
-          <Heading color="white" marginBottom='5' style={{alignSelf:'center'}} marginTop={5}>Report New Claim</Heading>
-        </View>
-        </Flex>
-      </View>
+                    <View style={{ width:'80%' }}>
+                        <Heading color="white" marginBottom='5' style={{alignSelf:'center'}} marginTop={5}>Report New Claim</Heading>
+                    </View>
+                </Flex>
+            </View>
 
-      <View style={styles.middleContainer}>
+            <View style={styles.middleContainer}>
 
-        <ScrollView>
+                <ScrollView>
 
           <View style={{padding:30}}>
 
@@ -139,20 +139,20 @@ export default function NewClaimScreen({navigation}) {
                         Select a vehicle
                     </FormControl.ErrorMessage>
                 </FormControl>
-            
+
           </View>
-          
+
           <Box p="1" bg="#154897"></Box>
 
-        
-          <View style={{padding:30}}>
 
-            
+                    <View style={{padding:30}}>
+
+
 
             <View style={{marginBottom:20}}>
           
               {/* Location */}
-    
+
                     <Input
                         placeholder={'Location'}
                         onChangeText={null}
@@ -161,19 +161,19 @@ export default function NewClaimScreen({navigation}) {
                         value={location}
                         isDisabled={true}
                     />
-                   
+
                 {/* <Checkbox value={true} accessibilityLabel="Select Different Location" >
                   Select Different Location
                 </Checkbox> */}
 
-              </View>
+                        </View>
 
           
-          <Text> <RNDateTimePicker mode='datetime' value={dateTime}  onChange={setDate}/> </Text>
+                        <Text> <RNDateTimePicker mode='datetime' value={dateTime}  onChange={setDate}/> </Text>
 
-          </View>
+                    </View>
           
-          <Box p="1" bg="#154897"></Box>
+                    <Box p="1" bg="#154897"></Box>
 
           <View style={{padding:30}}>
             <CustomButton text='Upload Images of Vehicle Number Plate' image={uploadImage}  buttonPress={()=>pickImage(false, 'nb_plate')}/>
@@ -181,43 +181,43 @@ export default function NewClaimScreen({navigation}) {
             <CustomButton text='Upload Damage Images' image={uploadImage} buttonPress={()=>pickImage(false,'damage')}/>
           </View>
               
-          <Box p="1" bg="#154897"></Box>
+                    <Box p="1" bg="#154897"></Box>
 
-          <View style={{padding:30}}>
-             <TextArea h={20} placeholder="Description" onChangeText={setDescription} value={description}  bgColor={'white'} borderColor={'#154897'} fontSize={20} />
-          </View>
+                    <View style={{padding:30}}>
+                        <TextArea h={20} placeholder="Description" onChangeText={setDescription} value={description}  bgColor={'white'} borderColor={'#154897'} fontSize={20} />
+                    </View>
 
-         <View style={{paddingHorizontal:30}}>
-          <Button small primary  bgColor={'#3774CE'} onPress={onSubmit}>
-              <Text style={styles.buttonText}>REPORT CLAIM</Text>
-            </Button>
-        </View> 
+                    <View style={{paddingHorizontal:30}}>
+                        <Button small primary  bgColor={'#3774CE'} onPress={onSubmit}>
+                            <Text style={styles.buttonText}>REPORT CLAIM</Text>
+                        </Button>
+                    </View>
 
-        </ScrollView>
+                </ScrollView>
 
-      </View>
-    </View>
-  );
+            </View>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
     mainContainer:{
-    height:'100%'
-  },
-  topContainer:{
-    backgroundColor: '#154897',
-    height:'15%',
-    paddingTop:50,
-    paddingLeft:20,
-    display:'flex'
+        height:'100%'
+    },
+    topContainer:{
+        backgroundColor: '#154897',
+        height:'15%',
+        paddingTop:50,
+        paddingLeft:20,
+        display:'flex'
 
-  },
-  middleContainer:{
-    height:'85%'
-  },
-  buttonText:{
-    color:'white',
-    fontSize:'18'
-  }
+    },
+    middleContainer:{
+        height:'85%'
+    },
+    buttonText:{
+        color:'white',
+        fontSize:'18'
+    }
 });
 

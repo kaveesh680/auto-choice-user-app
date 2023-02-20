@@ -7,7 +7,8 @@ export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
     const [isLoading, setIsLoading] = useState(true);
     const [userToken, setUserToken] = useState('');
-    // const [successMessage, setSuccessMessage] = useState('');
+    const [userDetails, setUserDetails] = useState(null);
+
 
     const toast = useToast();
 
@@ -26,6 +27,7 @@ export const AuthProvider = ({children}) => {
             toast.show({
                 description: `${response.data?.message}`
             });
+            setUserDetails(response.data.data);
         }).catch((err) => {
             console.log(err);
         })
@@ -59,7 +61,7 @@ export const AuthProvider = ({children}) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken}} >
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userDetails}} >
             {children}
         </AuthContext.Provider>
     )
