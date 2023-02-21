@@ -29,6 +29,7 @@
     "react-native-image-base64": "^0.1.4",
     "react-native-navigation-stack": "^0.1.2",
     "react-native-permissions": "^3.6.1",
+    "react-native-qrcode-svg": "^6.2.0",
     "react-native-screens": "~3.18.0",
     "react-native-svg": "13.4.0",
     "rn-fetch-blob": "^0.12.0"

@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import {Icon, IconButton, ScrollView, Text, Image, Badge} from "native-base";
 import { Entypo } from "@expo/vector-icons";
 import TextHeader from "../components/TextHeader";
+import QRCode from 'react-native-qrcode-svg';
 
 
 
@@ -135,6 +136,9 @@ export default function ViewClaim({route}) {
                         </Text>
                     </View>
                 </View>
+
+
+                <QRCode value={route.params.claimId} />
 
 
                 {/* Estimate */}
